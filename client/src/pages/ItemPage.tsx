@@ -1,35 +1,61 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Card } from "../components/ui/card";
-import { NavLink } from "react-router-dom";
+import { useState, useEffect } from "react";
+import type { ClothingItem } from "../types";
 
 export default function ItemPage() {
   const { id } = useParams();
+  const [itemInfo, setItemInfo] = useState<ClothingItem | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
-  const similarItems = ["1", "3", "4"];
+  useEffect(() => {
+    const getItemInfo = async () => {
+      try {
+        const response = await fetch(
+          `/api/items/${encodeURIComponent(id ?? "")}`
+        );
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const result: ClothingItem = await response.json();
+        setItemInfo(result);
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError(String(err));
+        }
+      }
+    };
 
-  const similarItemsElements = similarItems.map((item) => (
-    <NavLink to={"/items/" + item}>
-      <Card
-        key={item}
-        className="
-            w-32 
-            aspect-square 
-            flex 
-            items-center 
-            justify-center 
-            bg-white 
-            text-sm 
-            shadow-sm 
-            hover:shadow-lg 
-            hover:-translate-y-1 
-            transition
-            cursor-pointer
-        "
-      >
-        {item}
-      </Card>
-    </NavLink>
-  ));
+    if (id) {
+      getItemInfo();
+    }
+  }, [id]);
+
+  if (error) {
+    return <div>Error...</div>;
+  }
+
+  const deleteItem = async (id: string) => {
+    try {
+      const response = await fetch("delete_api_placeholder", {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      navigate("/closet");
+      console.log(`Successfully deleted item ${id}`);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError(String(err));
+      }
+    }
+  };
 
   return (
     <div className="flex flex-col lg:flex-row gap-16 px-8 py-12">
@@ -45,48 +71,69 @@ export default function ItemPage() {
           text-4xl 
           font-semibold 
           bg-white 
-          shadow-lg
-        "
+          shadow-lg"
       >
-        {id}
+        <img src={itemInfo?.img ?? ""} alt={itemInfo?.name ?? "item"} />
       </Card>
 
       {/* Item Details */}
       <div className="flex-1 max-w-xl space-y-6">
         {/* Title */}
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Item Name</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            {itemInfo?.name ?? ""}
+          </h1>
           <p className="text-sm text-muted-foreground">
-            Uploaded on Jan 27, 2026
+            {itemInfo?.upload_date
+              ? itemInfo.upload_date instanceof Date
+                ? itemInfo.upload_date.toLocaleDateString()
+                : new Date(itemInfo.upload_date).toLocaleDateString()
+              : ""}
           </p>
         </div>
 
         {/* Attributes */}
         <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
           <p>
-            <span className="font-medium">Category:</span> —
+            <span className="font-medium">
+              Category: {itemInfo?.category ?? ""}
+            </span>{" "}
+            —
           </p>
           <p>
-            <span className="font-medium">Color:</span> —
+            <span className="font-medium">Color: {itemInfo?.color ?? ""}</span>{" "}
+            —
           </p>
           <p>
-            <span className="font-medium">Material:</span> —
+            <span className="font-medium">
+              Material: {itemInfo?.material ?? ""}
+            </span>{" "}
+            —
           </p>
           <p>
-            <span className="font-medium">Brand:</span> —
+            <span className="font-medium">Brand: {itemInfo?.brand ?? ""}</span>{" "}
+            —
           </p>
           <p>
-            <span className="font-medium">Price:</span> —
+            <span className="font-medium">Price: ${itemInfo?.price ?? ""}</span>{" "}
+            —
           </p>
+          <button
+            onClick={() => {
+              if (id) deleteItem(id);
+            }}
+          >
+            Delete
+          </button>
         </div>
 
-        {/* Similar Items */}
+        {/* Similar Items
         <div className="pt-6">
           <h2 className="text-lg font-semibold mb-4">Similar items</h2>
           <div className="flex flex-row gap-6 flex-wrap">
             {similarItemsElements}
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
