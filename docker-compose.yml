@@ -4,11 +4,13 @@ services:
   api:
     build:
       context: ./backend
+    container_name: closet_ai_api
     env_file:
       - ./.env
     depends_on:
       - db
       - redis
+      - minio
     ports:
       - "8000:8000"
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
@@ -18,22 +20,26 @@ services:
   worker:
     build:
       context: ./backend
+    container_name: closet_ai_worker
     env_file:
       - ./.env
     depends_on:
       - redis
       - db
-    command: celery -A celery_app.celery_app worker --loglevel=INFO
+      - minio
+    command: celery -A app.worker worker --loglevel=INFO
     volumes:
       - ./backend:/app
 
   redis:
     image: redis:7-alpine
+    container_name: closet_ai_redis
     ports:
       - "6379:6379"
 
   db:
-    image: pgvector/pgvector:pg16
+    image: ankane/pgvector:pg15
+    container_name: closet_ai_db
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -43,5 +49,31 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  minio:
+    image: minio/minio
+    container_name: closet_ai_minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+
+  createbuckets:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5;
+      mc alias set local http://minio:9000 ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY};
+      mc mb -p local/${MINIO_BUCKET_NAME};
+      exit 0;
+      "
+
 volumes:
   pgdata:
+  minio_data:
