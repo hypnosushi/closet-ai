@@ -1,9 +1,7 @@
-version: "3.9"
-
 services:
   api:
     build:
-      context: ./backend
+      context: ./server
     container_name: closet_ai_api
     env_file:
       - ./.env
@@ -15,11 +13,11 @@ services:
       - "8000:8000"
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     volumes:
-      - ./backend:/app
+      - ./server:/app
 
   worker:
     build:
-      context: ./backend
+      context: ./server
     container_name: closet_ai_worker
     env_file:
       - ./.env
@@ -29,7 +27,7 @@ services:
       - minio
     command: celery -A app.worker worker --loglevel=INFO
     volumes:
-      - ./backend:/app
+      - ./server:/app
 
   redis:
     image: redis:7-alpine
@@ -38,7 +36,7 @@ services:
       - "6379:6379"
 
   db:
-    image: ankane/pgvector:pg15
+    image: pgvector/pgvector:pg15
     container_name: closet_ai_db
     environment:
       POSTGRES_DB: ${POSTGRES_DB}

@@ -28,7 +28,7 @@ RUN apt-get update && apt-get install -y \
 
 # Copy installed python packages
 COPY --from=builder /usr/local/lib/python3.11 /usr/local/lib/python3.11
-COPY --from=builder /user/local/bin /usr/local/bin
+COPY --from=builder /usr/local/bin /usr/local/bin
 
 # Copy application code
 COPY . .
