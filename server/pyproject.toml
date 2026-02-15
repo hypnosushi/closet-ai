@@ -1,0 +1,38 @@
+[project]
+name = "server"
+version = "0.1.0"
+description = "Closet AI backend server"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    # Web / API
+    "fastapi[standard]>=0.128.5",
+    # Config
+    "pydantic-settings>=2.0",
+    # Database
+    "sqlalchemy>=2.0.46",
+    "psycopg2-binary>=2.9.11",
+    "pgvector>=0.3",
+    # Async / Background jobs
+    "celery>=5.0",
+    "redis>=5.0",
+    # ML / CV
+    "torch>=2.0",
+    "ultralytics>=8.0",
+    "opencv-python-headless>=4.0",
+    "numpy>=1.24",
+    # Object storage (MinIO / S3)
+    "boto3>=1.34",
+    "python-multipart>=0.0.22",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.1",
+]
+
+[tool.ruff]
+  line-length = 88
+
+  [tool.ruff.lint]
+  select = ["E", "F", "I"]
