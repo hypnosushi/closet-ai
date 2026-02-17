@@ -1,8 +1,8 @@
-from pydantic_settings import BaseSettings
-
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-    # -----------------------------
+    model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
+    # ---------------S--------------
     # Database
     # -----------------------------
     POSTGRES_HOST: str = "db"
@@ -36,11 +36,6 @@ class Settings(BaseSettings):
     MINIO_ENDPOINT: str = "http://minio:9000"
     MINIO_ACCESS_KEY: str = "minioadmin"
     MINIO_SECRET_KEY: str = "minioadmin"
-    MINIO_BUCKET_NAME: str = "closet-ai"
-
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
-
+    MINIO_BUCKET_NAME: str = "closet-ai"    
 
 settings = Settings()

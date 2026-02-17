@@ -13,8 +13,6 @@ async def get_clothes(db: Session = Depends(get_db)):
         response = await get_all_clothing_items(user_id=1, db=db)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error retrieving clothing items: {str(e)}")
-    if not response:
-        raise HTTPException(status_code=404, detail="No clothing items found")
     return response
 
 
