@@ -15,7 +15,6 @@ class ClothingItemCreate(BaseModel):
 
 class ClothingItemResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    
     id: int
     created_at: datetime
     user_id: int
@@ -24,6 +23,17 @@ class ClothingItemResponse(BaseModel):
     color: str
     material: str | None
     img: str | None
+    size: str | None = None
+    brand: str | None = None
+    price: float | None = None
+
+
+class ClothingItemUpdate(BaseModel):
+    name: str | None = None
+    category: str | None = None
+    color: str | None = None
+    material: str | None = None
+    img: str | None = None
     size: str | None = None
     brand: str | None = None
     price: float | None = None

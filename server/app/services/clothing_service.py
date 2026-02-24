@@ -2,7 +2,7 @@ from fastapi import UploadFile, File
 from typing import Optional
 from sqlalchemy.orm import Session
 from app.models.clothes import ClothingItem
-from app.schemas.clothes import ClothingItemCreate
+from app.schemas.clothes import ClothingItemCreate, ClothingItemUpdate
 from app.services.vision_service import parse_clothing_img
 from app.services.file_service import save_upload
 
@@ -71,6 +71,39 @@ async def get_clothing_item(clothing_id: int, db: Session) -> Optional[ClothingI
     except Exception as e:
         raise Exception(f"Error retrieving clothing item: {str(e)}")
     
+
+async def update_clothing_item(user_id: int, clothing_id: int, clothing: ClothingItemUpdate, db: Session) -> Optional[ClothingItem]:
+    """
+    Updates a clothing item by ID
+    """
+    try:
+        clothing_item = db.query(ClothingItem).filter(ClothingItem.user_id == user_id,ClothingItem.id == clothing_id).first()
+        if not clothing_item:
+            raise Exception("Clothing item not found")
+        for field, value in clothing.model_dump(exclude_unset=True).items():
+            setattr(clothing_item, field, value)
+        db.commit()
+        db.refresh(clothing_item)
+        return clothing_item
+    except Exception as e:
+        db.rollback()
+        raise Exception(f"Error updating clothing item: {str(e)}")
+
+
+async def delete_clothing_item(user_id: int, clothing_id: int, db: Session) -> None:
+    """
+    Deletes a clothing item by ID
+    """
+    try:
+        clothing_item = db.query(ClothingItem).filter(ClothingItem.user_id == user_id, ClothingItem.id == clothing_id).first()
+        if not clothing_item:
+            raise Exception("Clothing item not found")
+        db.delete(clothing_item)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise Exception(f"Error deleting clothing item: {str(e)}")
+
 
 async def get_all_clothing_items(
           user_id: int, 

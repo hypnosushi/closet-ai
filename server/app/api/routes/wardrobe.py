@@ -2,15 +2,15 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.models.clothes import ClothingItem
-from app.schemas.clothes import ClothingItemCreate, ClothingItemResponse
-from app.services.clothing_service import create_clothing_item, get_clothing_item, get_all_clothing_items, upload_clothing_item
+from app.schemas.clothes import ClothingItemCreate, ClothingItemResponse, ClothingItemUpdate
+from app.services import clothing_service
 
 router = APIRouter()
 
 @router.get("/wardrobe", response_model=list[ClothingItemResponse])
 async def get_clothes(db: Session = Depends(get_db)):
     try: 
-        response = await get_all_clothing_items(user_id=1, db=db)
+        response = await clothing_service.get_all_clothing_items(user_id=1, db=db)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error retrieving clothing items: {str(e)}")
     return response
@@ -19,7 +19,7 @@ async def get_clothes(db: Session = Depends(get_db)):
 @router.get("/wardrobe/{clothing_id}", response_model=ClothingItemResponse)
 async def get_clothing(clothing_id: int, db: Session = Depends(get_db)):
     try:
-        response = await get_clothing_item(clothing_id=clothing_id, db=db)
+        response = await clothing_service.get_clothing_item(clothing_id=clothing_id, db=db)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error retrieving clothing item: {str(e)}")
     if not response:
@@ -30,7 +30,7 @@ async def get_clothing(clothing_id: int, db: Session = Depends(get_db)):
 @router.post("/wardrobe", status_code=201, response_model=ClothingItemResponse)
 async def create_clothing(clothing: ClothingItemCreate, db: Session = Depends(get_db)):
     try: 
-        clothing_item = await create_clothing_item(user_id=1, clothing=clothing, db=db)
+        clothing_item = await clothing_service.create_clothing_item(user_id=1, clothing=clothing, db=db)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error creating clothing item: {str(e)}")
     
@@ -43,8 +43,23 @@ async def upload_clothing(
     db: Session = Depends(get_db)
 ):
     try: 
-        clothing_item = await upload_clothing_item(user_id=1, file=file, db=db)
+        clothing_item = await clothing_service.upload_clothing_item(user_id=1, file=file, db=db)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error uploading clothing item: {str(e)}")
     return clothing_item
-    
+
+@router.patch("/wardrobe/{clothing_id}", response_model=ClothingItemResponse)
+async def update_clothing(clothing_id: int, clothing_update: ClothingItemUpdate, db: Session = Depends(get_db)):
+    try:
+        response = await clothing_service.update_clothing_item(user_id=1, clothing_id=clothing_id, clothing=clothing_update, db=db)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error updating clothing item: {str(e)}")
+    return response
+
+@router.delete("/wardrobe/{clothing_id}", status_code=204)
+async def delete_clothing(clothing_id: int, db: Session = Depends(get_db)):
+    try:
+        await clothing_service.delete_clothing_item(user_id=1, clothing_id=clothing_id, db=db)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting clothing item: {str(e)}")
+    return
