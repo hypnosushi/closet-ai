@@ -28,6 +28,7 @@ services:
     command: celery -A app.worker worker --loglevel=INFO
     volumes:
       - ./server:/app
+      - app_venv:/app/.venv
 
   redis:
     image: redis:7-alpine
@@ -44,6 +45,19 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  test_db:
+    image: pgvector/pgvector:pg15
+    container_name: closet_ai_db_test
+    profiles: [test]
+    environment:
+      POSTGRES_DB: closet_ai_test
+      POSTGRES_USER: postgres 
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
 
@@ -75,3 +89,4 @@ services:
 volumes:
   pgdata:
   minio_data:
+  app_venv:
