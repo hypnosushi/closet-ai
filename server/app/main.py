@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import chat, auth
@@ -5,9 +6,13 @@ from app.models import Base
 from app.db.session import engine
 from app.api.routes import wardrobe
 
-Base.metadata.create_all(bind=engine)
-
-app = FastAPI(title="Closet AI")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup code
+    Base.metadata.create_all(bind=engine)
+    yield
+    
+app = FastAPI(title="Closet AI", lifespan=lifespan)
 
 # CORS config
 app.add_middleware(

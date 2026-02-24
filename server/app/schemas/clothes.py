@@ -15,7 +15,6 @@ class ClothingItemCreate(BaseModel):
 
 class ClothingItemResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    
     id: int
     created_at: datetime
     user_id: int
