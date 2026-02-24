@@ -15,6 +15,8 @@ class ClothingItemCreate(BaseModel):
 
 class ClothingItemResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
+    
+    id: int
     created_at: datetime
     user_id: int
     name: str
@@ -25,6 +27,7 @@ class ClothingItemResponse(BaseModel):
     size: str | None = None
     brand: str | None = None
     price: float | None = None
+
 
 class ClothingItemUpdate(BaseModel):
     name: str | None = None
