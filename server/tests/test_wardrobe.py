@@ -1,7 +1,6 @@
 
 from app.models.clothes import ClothingItem
 
-
 def test_get_wardrobe_empty(client):
     response = client.get("/wardrobe")
     assert response.status_code == 200
@@ -66,3 +65,48 @@ def test_create_clothing_item(client, db, test_user):
     assert data["name"] == "Test Jacket"
     assert "id" in data
     assert "created_at" in data
+
+def test_update_clothing_item(client, db, test_user):
+    # Create a clothing item in the database
+    clothing_item = ClothingItem(
+        user_id=test_user.id,
+        name="Test Shoes",
+        category="Footwear",
+        color="White",
+        material="Leather",
+        img="http://example.com/shoes.jpg"
+    )
+    db.add(clothing_item)
+    db.commit()
+    db.refresh(clothing_item)
+
+    update_data = {
+        "color": "Black",
+        "size": "10"
+    }
+    response = client.patch(f"/wardrobe/{clothing_item.id}", json=update_data)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["color"] == "Black"
+    assert data["size"] == "10"
+
+def test_delete_clothing_item(client, db, test_user):
+    # Create a clothing item in the database
+    clothing_item = ClothingItem(
+        user_id=test_user.id,
+        name="Test Hat",
+        category="Accessories",
+        color="Green",
+        material="Wool",
+        img="http://example.com/hat.jpg"
+    )
+    db.add(clothing_item)
+    db.commit()
+    db.refresh(clothing_item)
+
+    response = client.delete(f"/wardrobe/{clothing_item.id}")
+    assert response.status_code == 204
+
+    # Verify the item is deleted
+    response = client.get(f"/wardrobe/{clothing_item.id}")
+    assert response.status_code == 404
