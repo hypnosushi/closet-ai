@@ -21,9 +21,9 @@ class Settings(BaseSettings):
         )
 
     # JWT signing key
-    secret_key: str = "supersecretkey"
-    algorithm: str = "HS256"
-    access_token_expire_minutes: int = 30
+    SECRET: str = "supersecretkey"
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
     # -----------------------------
     # Redis / Celery
