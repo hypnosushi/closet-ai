@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import ItemForm from "./ItemForm";
 
 export default function ChatSection() {
   const examples = [
@@ -14,6 +15,7 @@ export default function ChatSection() {
   const [messages, setMessages] = useState<
     { role: "user" | "ai"; text: string }[]
   >([]);
+  const [formOpen, setFormOpen] = useState(false);
 
   useEffect(() => {
     if (query || isFocused) return;
@@ -35,8 +37,27 @@ export default function ChatSection() {
 
   return (
     <div className="flex flex-col justify-between h-[calc(100vh-64px)] w-full max-w-lg px-4 py-8 pb-16">
+      <button
+        onClick={() => setFormOpen(true)}
+        className="mt-1 flex items-center gap-1.5 text-sm font-medium text-white bg-stone-900 hover:bg-stone-700 px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
+      >
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 4v16m8-8H4"
+          />
+        </svg>
+        Add item
+      </button>
       {/* Top label */}
-      <div>
+      <div className="py-8">
         <p className="text-xs uppercase tracking-widest text-stone-400 mb-1 font-medium">
           Your stylist
         </p>
@@ -125,6 +146,7 @@ export default function ChatSection() {
           </svg>
         </button>
       </div>
+      <ItemForm open={formOpen} onClose={() => setFormOpen(false)} />
     </div>
   );
 }
