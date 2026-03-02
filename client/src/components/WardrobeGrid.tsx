@@ -10,7 +10,7 @@ export default function WardrobeGrid() {
   useEffect(() => {
     const getWardrobeItems = async () => {
       try {
-        const response = await fetch("api_placeholder");
+        const response = await fetch("http://localhost:5173/wardrobe");
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }

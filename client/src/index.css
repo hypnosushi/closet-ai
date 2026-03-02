@@ -123,6 +123,24 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-[#FAF7F2] text-[#3D2B1F];
+    font-family: "Garamond", serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply tracking-tight leading-snug;
+    font-family: "Garamond", serif;
+  }
+  p,
+  span,
+  li {
+    @apply leading-relaxed;
   }
 }
