@@ -1,16 +1,20 @@
 import { useState, useRef } from "react";
+import type { ClothingItem } from "../types";
 
 interface ItemFormProps {
   open: boolean;
   onClose: () => void;
+  onSubmit?: (item: Omit<ClothingItem, "id" | "upload_date">) => void;
 }
 
-export default function ItemForm({ open, onClose }: ItemFormProps) {
+export default function ItemForm({ open, onClose, onSubmit }: ItemFormProps) {
   const [image, setImage] = useState<string | null>(null);
+  const [name, setName] = useState("");
   const [brand, setBrand] = useState("");
   const [color, setColor] = useState("");
-  const [type, setType] = useState("");
+  const [category, setCategory] = useState("");
   const [material, setMaterial] = useState("");
+  const [price, setPrice] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const clothingTypes = [
@@ -56,10 +60,33 @@ export default function ItemForm({ open, onClose }: ItemFormProps) {
   };
 
   const handleSubmit = () => {
+    if (!name || !category) return;
+    onSubmit?.({
+      name,
+      brand,
+      color,
+      category,
+      material,
+      price: parseFloat(price) || 0,
+      img: image ?? "",
+    });
+    // Reset
+    setImage(null);
+    setName("");
+    setBrand("");
+    setColor("");
+    setCategory("");
+    setMaterial("");
+    setPrice("");
     onClose();
   };
 
   if (!open) return null;
+
+  const inputClass =
+    "w-full bg-stone-50 border border-stone-200 focus:border-stone-400 focus:ring-2 focus:ring-stone-100 rounded-xl py-2.5 px-4 text-sm text-stone-800 outline-none transition-all duration-200 placeholder:text-stone-300";
+  const labelClass =
+    "text-xs uppercase tracking-widest text-stone-400 font-medium block mb-1.5";
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
@@ -70,7 +97,7 @@ export default function ItemForm({ open, onClose }: ItemFormProps) {
       />
 
       {/* Panel */}
-      <div className="relative bg-[#FAF7F2] rounded-t-3xl sm:rounded-3xl w-full sm:max-w-md p-6 shadow-xl animate-in slide-in-from-bottom duration-300">
+      <div className="relative bg-[#FAF7F2] rounded-t-3xl sm:rounded-3xl w-full sm:max-w-md p-6 shadow-xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -140,44 +167,50 @@ export default function ItemForm({ open, onClose }: ItemFormProps) {
             />
           </div>
 
+          {/* Name */}
+          <div>
+            <label className={labelClass}>Name</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. White Linen Shirt"
+              className={inputClass}
+            />
+          </div>
+
           {/* Brand */}
           <div>
-            <label className="text-xs uppercase tracking-widest text-stone-400 font-medium block mb-1.5">
-              Brand
-            </label>
+            <label className={labelClass}>Brand</label>
             <input
               type="text"
               value={brand}
               onChange={(e) => setBrand(e.target.value)}
               placeholder="e.g. Zara, Levi's, Uniqlo"
-              className="w-full bg-stone-50 border border-stone-200 focus:border-stone-400 focus:ring-2 focus:ring-stone-100 rounded-xl py-2.5 px-4 text-sm text-stone-800 outline-none transition-all duration-200 placeholder:text-stone-300"
+              className={inputClass}
             />
           </div>
 
           {/* Color */}
           <div>
-            <label className="text-xs uppercase tracking-widest text-stone-400 font-medium block mb-1.5">
-              Color
-            </label>
+            <label className={labelClass}>Color</label>
             <input
               type="text"
               value={color}
               onChange={(e) => setColor(e.target.value)}
               placeholder="e.g. Navy, Cream, Forest Green"
-              className="w-full bg-stone-50 border border-stone-200 focus:border-stone-400 focus:ring-2 focus:ring-stone-100 rounded-xl py-2.5 px-4 text-sm text-stone-800 outline-none transition-all duration-200 placeholder:text-stone-300"
+              className={inputClass}
             />
           </div>
 
-          {/* Type + Material side by side */}
+          {/* Category + Material */}
           <div className="flex gap-3">
             <div className="flex-1">
-              <label className="text-xs uppercase tracking-widest text-stone-400 font-medium block mb-1.5">
-                Type
-              </label>
+              <label className={labelClass}>Category</label>
               <select
-                value={type}
-                onChange={(e) => setType(e.target.value)}
-                className="w-full bg-stone-50 border border-stone-200 focus:border-stone-400 focus:ring-2 focus:ring-stone-100 rounded-xl py-2.5 px-4 text-sm text-stone-800 outline-none transition-all duration-200 appearance-none"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className={inputClass}
               >
                 <option value="" disabled>
                   Select
@@ -188,13 +221,11 @@ export default function ItemForm({ open, onClose }: ItemFormProps) {
               </select>
             </div>
             <div className="flex-1">
-              <label className="text-xs uppercase tracking-widest text-stone-400 font-medium block mb-1.5">
-                Material
-              </label>
+              <label className={labelClass}>Material</label>
               <select
                 value={material}
                 onChange={(e) => setMaterial(e.target.value)}
-                className="w-full bg-stone-50 border border-stone-200 focus:border-stone-400 focus:ring-2 focus:ring-stone-100 rounded-xl py-2.5 px-4 text-sm text-stone-800 outline-none transition-all duration-200 appearance-none"
+                className={inputClass}
               >
                 <option value="" disabled>
                   Select
@@ -205,12 +236,30 @@ export default function ItemForm({ open, onClose }: ItemFormProps) {
               </select>
             </div>
           </div>
+
+          {/* Price */}
+          <div>
+            <label className={labelClass}>Price</label>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-4 flex items-center text-sm text-stone-400">
+                $
+              </span>
+              <input
+                type="number"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                placeholder="0.00"
+                className={`${inputClass} pl-8`}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Submit */}
         <button
           onClick={handleSubmit}
-          className="w-full mt-6 bg-stone-900 hover:bg-stone-700 text-white text-sm font-medium py-3 rounded-2xl transition-all duration-200"
+          disabled={!name || !category}
+          className="w-full mt-6 bg-stone-900 hover:bg-stone-700 disabled:bg-stone-200 disabled:cursor-not-allowed text-white text-sm font-medium py-3 rounded-2xl transition-all duration-200"
         >
           Add to closet
         </button>
