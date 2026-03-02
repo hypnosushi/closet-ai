@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import ItemForm from "./ItemForm";
+import type { ClothingItem } from "../types";
 
 export default function ChatSection() {
   const examples = [
@@ -19,6 +20,7 @@ export default function ChatSection() {
 
   useEffect(() => {
     if (query || isFocused) return;
+
     const interval = setInterval(() => {
       setVisible(false);
       setTimeout(() => {
@@ -26,13 +28,33 @@ export default function ChatSection() {
         setVisible(true);
       }, 300);
     }, 3000);
+
     return () => clearInterval(interval);
-  }, [query, isFocused]);
+  }, [query, isFocused, examples.length]);
 
   const handleSend = () => {
     if (!query.trim()) return;
     setMessages((prev) => [...prev, { role: "user", text: query }]);
     setQuery("");
+  };
+
+  const onSubmit = async (info: Omit<ClothingItem, "id" | "upload_date">) => {
+    try {
+      const response = await fetch("http://localhost:8000/wardrobe", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(info),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log("Item saved:", data);
+    } catch (err) {
+      console.error("Failed to save item:", err);
+    }
   };
 
   return (
@@ -56,6 +78,7 @@ export default function ChatSection() {
         </svg>
         Add item
       </button>
+
       {/* Top label */}
       <div className="py-8">
         <p className="text-xs uppercase tracking-widest text-stone-400 mb-1 font-medium">
@@ -86,7 +109,9 @@ export default function ChatSection() {
           messages.map((msg, i) => (
             <div
               key={i}
-              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+              className={`flex ${
+                msg.role === "user" ? "justify-end" : "justify-start"
+              }`}
             >
               <div
                 className={`max-w-xs px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
@@ -126,6 +151,7 @@ export default function ChatSection() {
             </span>
           )}
         </div>
+
         <button
           onClick={handleSend}
           disabled={!query.trim()}
@@ -146,7 +172,12 @@ export default function ChatSection() {
           </svg>
         </button>
       </div>
-      <ItemForm open={formOpen} onClose={() => setFormOpen(false)} />
+
+      <ItemForm
+        open={formOpen}
+        onClose={() => setFormOpen(false)}
+        onSubmit={onSubmit}
+      />
     </div>
   );
 }

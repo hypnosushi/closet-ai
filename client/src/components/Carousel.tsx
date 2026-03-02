@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Carousel,
   CarouselContent,
@@ -7,6 +7,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import type { ClothingItem } from "../types";
 
 const carouselLabels = ["Recently Added", "Favorites", "Summer Picks"];
 
@@ -16,7 +17,9 @@ export default function CarouselSection() {
     useRef<HTMLDivElement | null>(null),
     useRef<HTMLDivElement | null>(null),
   ];
-  const itemsPerCarousel = 5;
+  const [carouselData, setCarouselData] = useState<ClothingItem[][]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const intervals = carousels.map((carouselRef) =>
@@ -29,8 +32,40 @@ export default function CarouselSection() {
         }
       }, 3000),
     );
+    const getWardrobeItems = async () => {
+      try {
+        const response = await fetch("http://localhost:8000/wardrobe");
+        if (!response.ok)
+          throw new Error(`HTTP error! status: ${response.status}`);
+        const result = await response.json();
+        const recentItems = result.slice(0, 8);
+        const favoriteItems = result.slice(0, 8); // replace with actual favorites logic later
+        const summerItems = result.slice(0, 8); // replace with actual filter logic later
+
+        setCarouselData([recentItems, favoriteItems, summerItems]);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : String(err));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    getWardrobeItems();
     return () => intervals.forEach((i) => clearInterval(i));
   }, []);
+
+  if (isLoading)
+    return (
+      <div className="flex items-center justify-center h-full text-stone-400 text-sm">
+        Loading...
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="flex items-center justify-center h-full text-stone-400 text-sm">
+        Something went wrong: {error}
+      </div>
+    );
 
   return (
     <div className="flex flex-col h-[calc(100vh-64px)] px-4 py-8 gap-6 w-full max-w-lg">
@@ -48,18 +83,26 @@ export default function CarouselSection() {
           </p>
           <Carousel ref={carouselRef} className="w-full px-6">
             <CarouselContent className="-ml-2">
-              {Array.from({ length: itemsPerCarousel }).map((_, index) => (
-                <CarouselItem key={index} className="pl-3 basis-1/3">
+              {carouselData[carouselIndex].map((item, index) => (
+                <CarouselItem key={item.id ?? index} className="pl-3 basis-1/3">
                   <Card className="border border-stone-200 shadow-none hover:border-stone-400 hover:shadow-sm transition-all duration-200 rounded-2xl overflow-hidden py-0 gap-0">
                     <CardContent
                       className="p-0 bg-stone-50"
                       style={{ aspectRatio: "1 / 1" }}
                     >
-                      <div className="w-full h-full flex items-center justify-center">
-                        <span className="text-sm font-medium text-stone-300">
-                          {index + 1}
-                        </span>
-                      </div>
+                      {item.img ? (
+                        <img
+                          src={item.img}
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <span className="text-sm font-medium text-stone-300">
+                            {index + 1}
+                          </span>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 </CarouselItem>

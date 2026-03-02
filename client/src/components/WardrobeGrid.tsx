@@ -2,97 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import type { ClothingItem } from "../types";
 
-const DUMMY_DATA: ClothingItem[] = [
-  {
-    id: 1,
-    name: "White Linen Shirt",
-    img: "https://images.unsplash.com/photo-1598033129183-c4f50c736f10?w=400",
-    upload_date: new Date(),
-    category: "Shirt",
-    color: "White",
-    material: "Linen",
-    brand: "Uniqlo",
-    price: 39,
-  },
-  {
-    id: 2,
-    name: "Navy Wool Coat",
-    img: "https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=400",
-    upload_date: new Date(),
-    category: "Coat",
-    color: "Navy",
-    material: "Wool",
-    brand: "COS",
-    price: 220,
-  },
-  {
-    id: 3,
-    name: "Cream Cashmere Sweater",
-    img: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=400",
-    upload_date: new Date(),
-    category: "Sweater",
-    color: "Cream",
-    material: "Cashmere",
-    brand: "Everlane",
-    price: 130,
-  },
-  {
-    id: 4,
-    name: "Straight Leg Jeans",
-    img: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400",
-    upload_date: new Date(),
-    category: "Jeans",
-    color: "Indigo",
-    material: "Denim",
-    brand: "Levi's",
-    price: 89,
-  },
-  {
-    id: 5,
-    name: "Silk Slip Dress",
-    img: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400",
-    upload_date: new Date(),
-    category: "Dress",
-    color: "Champagne",
-    material: "Silk",
-    brand: "Reformation",
-    price: 180,
-  },
-  {
-    id: 6,
-    name: "Black Leather Jacket",
-    img: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400",
-    upload_date: new Date(),
-    category: "Jacket",
-    color: "Black",
-    material: "Leather",
-    brand: "AllSaints",
-    price: 350,
-  },
-  {
-    id: 7,
-    name: "Striped Cotton Tee",
-    img: "https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=400",
-    upload_date: new Date(),
-    category: "T-Shirt",
-    color: "Blue/White",
-    material: "Cotton",
-    brand: "J.Crew",
-    price: 45,
-  },
-  {
-    id: 8,
-    name: "Tailored Trousers",
-    img: "https://images.unsplash.com/photo-1594938298603-c8148c4b4063?w=400",
-    upload_date: new Date(),
-    category: "Pants",
-    color: "Camel",
-    material: "Wool",
-    brand: "Zara",
-    price: 69,
-  },
-];
-
 export default function WardrobeGrid() {
   const [data, setData] = useState<ClothingItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -102,8 +11,11 @@ export default function WardrobeGrid() {
   useEffect(() => {
     const getWardrobeItems = async () => {
       try {
-        await new Promise((res) => setTimeout(res, 500));
-        setData(DUMMY_DATA);
+        const response = await fetch("http://localhost:8000/wardrobe");
+        if (!response.ok)
+          throw new Error(`HTTP error! status: ${response.status}`);
+        const result = await response.json();
+        setData(result);
       } catch (err) {
         setError(err instanceof Error ? err.message : String(err));
       } finally {
