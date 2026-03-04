@@ -1,4 +1,3 @@
-
 from app.models.clothes import ClothingItem
 
 def test_get_wardrobe_empty(client):
