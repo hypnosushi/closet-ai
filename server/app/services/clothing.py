@@ -3,8 +3,8 @@ from typing import Optional
 from sqlalchemy.orm import Session
 from app.models.clothes import ClothingItem
 from app.schemas.clothes import ClothingItemCreate, ClothingItemUpdate
-from server.app.services.vision import parse_clothing_img
-from server.app.services.file import save_upload
+from app.services.vision import parse_clothing_img
+from app.services.file import save_upload
 
 
 async def create_clothing_item(
