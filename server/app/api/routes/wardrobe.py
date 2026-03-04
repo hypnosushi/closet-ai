@@ -39,18 +39,6 @@ async def create_clothing(item: ClothingItemCreate, db: Session = Depends(get_db
     
     return clothing_item
 
-
-@router.post("/wardrobe/upload", status_code=201, response_model=ClothingItemResponse)
-async def upload_clothing(
-    file: UploadFile = File(..., description="Upload a clothing item image", media_type="image/*"), 
-    db: Session = Depends(get_db), user: User = Depends(get_current_user)
-):
-    try: 
-        clothing_item = await clothing.upload_clothing_item(user_id=user.id, file=file, db=db)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error uploading clothing item: {str(e)}")
-    return clothing_item
-
 @router.patch("/wardrobe/{clothing_id}", response_model=ClothingItemResponse)
 async def update_clothing(clothing_id: int, clothing_update: ClothingItemUpdate, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     try:
