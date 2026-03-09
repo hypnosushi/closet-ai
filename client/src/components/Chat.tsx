@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import ItemForm from "./ItemForm";
 import type { ClothingItem } from "../types";
+import { useAuth } from "../context/AuthContext";
 
 export default function ChatSection() {
   const examples = [
@@ -17,6 +18,7 @@ export default function ChatSection() {
     { role: "user" | "ai"; text: string }[]
   >([]);
   const [formOpen, setFormOpen] = useState(false);
+  const { token } = useAuth();
 
   useEffect(() => {
     if (query || isFocused) return;
@@ -38,20 +40,38 @@ export default function ChatSection() {
     setQuery("");
   };
 
-  const onSubmit = async (info: Omit<ClothingItem, "id" | "upload_date">) => {
+  const onSubmit = async (
+    info: Omit<ClothingItem, "id" | "upload_date">,
+    imageFile: File | null,
+  ) => {
     try {
-      const response = await fetch("http://localhost:8000/wardrobe", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(info),
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (imageFile) {
+        const formData = new FormData();
+        formData.append("file", imageFile);
+
+        const response = await fetch("http://localhost:8000/wardrobe/upload", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData,
+        });
+        if (!response.ok)
+          throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        console.log("Item saved via upload:", data);
+      } else {
+        const response = await fetch("http://localhost:8000/wardrobe", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(info),
+        });
+        if (!response.ok)
+          throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        console.log("Item saved manually:", data);
       }
-      const data = await response.json();
-      console.log("Item saved:", data);
     } catch (err) {
       console.error("Failed to save item:", err);
     }
