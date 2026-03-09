@@ -4,7 +4,10 @@ import type { ClothingItem } from "../types";
 interface ItemFormProps {
   open: boolean;
   onClose: () => void;
-  onSubmit?: (item: Omit<ClothingItem, "id" | "upload_date">) => void;
+  onSubmit?: (
+    item: Omit<ClothingItem, "id" | "upload_date">,
+    imageFile: File | null,
+  ) => void;
 }
 
 export default function ItemForm({ open, onClose, onSubmit }: ItemFormProps) {
@@ -15,6 +18,7 @@ export default function ItemForm({ open, onClose, onSubmit }: ItemFormProps) {
   const [category, setCategory] = useState("");
   const [material, setMaterial] = useState("");
   const [price, setPrice] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const clothingTypes = [
@@ -53,6 +57,7 @@ export default function ItemForm({ open, onClose, onSubmit }: ItemFormProps) {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setImageFile(file);
       const reader = new FileReader();
       reader.onload = () => setImage(reader.result as string);
       reader.readAsDataURL(file);
@@ -60,16 +65,19 @@ export default function ItemForm({ open, onClose, onSubmit }: ItemFormProps) {
   };
 
   const handleSubmit = () => {
-    if (!name || !category) return;
-    onSubmit?.({
-      name,
-      brand,
-      color,
-      category,
-      material,
-      price: parseFloat(price) || 0,
-      img: image ?? "",
-    });
+    if ((!imageFile && !name) || !category) return;
+    onSubmit?.(
+      {
+        name,
+        brand,
+        color,
+        category,
+        material,
+        price: parseFloat(price) || 0,
+        img: image ?? "",
+      },
+      imageFile,
+    );
     // Reset
     setImage(null);
     setName("");
@@ -78,6 +86,7 @@ export default function ItemForm({ open, onClose, onSubmit }: ItemFormProps) {
     setCategory("");
     setMaterial("");
     setPrice("");
+    setImageFile(null);
     onClose();
   };
 
@@ -258,7 +267,7 @@ export default function ItemForm({ open, onClose, onSubmit }: ItemFormProps) {
         {/* Submit */}
         <button
           onClick={handleSubmit}
-          disabled={!name || !category}
+          disabled={!imageFile && (!name || !category)}
           className="w-full mt-6 bg-stone-900 hover:bg-stone-700 disabled:bg-stone-200 disabled:cursor-not-allowed text-white text-sm font-medium py-3 rounded-2xl transition-all duration-200"
         >
           Add to closet
