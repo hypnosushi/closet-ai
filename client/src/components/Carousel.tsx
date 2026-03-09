@@ -8,6 +8,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import type { ClothingItem } from "../types";
+import { useAuth } from "../context/AuthContext";
 
 const carouselLabels = ["Recently Added", "Favorites", "Summer Picks"];
 
@@ -20,6 +21,7 @@ export default function CarouselSection() {
   const [carouselData, setCarouselData] = useState<ClothingItem[][]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { token } = useAuth();
 
   useEffect(() => {
     const intervals = carousels.map((carouselRef) =>
@@ -34,7 +36,9 @@ export default function CarouselSection() {
     );
     const getWardrobeItems = async () => {
       try {
-        const response = await fetch("http://localhost:8000/wardrobe");
+        const response = await fetch("http://localhost:8000/wardrobe", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         if (!response.ok)
           throw new Error(`HTTP error! status: ${response.status}`);
         const result = await response.json();

@@ -1,17 +1,21 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import type { ClothingItem } from "../types";
+import { useAuth } from "../context/AuthContext";
 
 export default function WardrobeGrid() {
   const [data, setData] = useState<ClothingItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { token } = useAuth();
 
   useEffect(() => {
     const getWardrobeItems = async () => {
       try {
-        const response = await fetch("http://localhost:8000/wardrobe");
+        const response = await fetch("http://localhost:8000/wardrobe", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         if (!response.ok)
           throw new Error(`HTTP error! status: ${response.status}`);
         const result = await response.json();
