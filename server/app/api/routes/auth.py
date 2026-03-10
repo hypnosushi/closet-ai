@@ -7,7 +7,6 @@ from app.services import auth
 
 router = APIRouter(prefix="/auth")
 
-
 @router.post("/login", response_model=Token)
 async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = auth.authenticate_user(db, email=form_data.username, password=form_data.password)
@@ -17,12 +16,12 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
     access_token = auth.create_access_token(data={"sub": str(user.id)})
     return {"access_token": access_token, "token_type": "bearer"}
 
-@router.post("/register", response_model=Token)
+@router.post("/register", response_model=Token, status_code=201)
 async def register(user: UserCreate, db: Session = Depends(get_db)):
     existing_user = auth.get_user_by_email(db, email=user.email)
     if existing_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
-    
+        raise HTTPException(status_code=409, detail="Email already registered")
+        
     #TODO: validate password strength
 
     created_user = auth.create_user(db, email=user.email, password=user.password)

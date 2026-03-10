@@ -1,6 +1,7 @@
 import pytest
 from sqlalchemy import create_engine
 from app.models.user import User
+from app.models.clothes import ClothingItem
 from sqlalchemy.orm import sessionmaker
 from fastapi.testclient import TestClient
 from app.models import Base
@@ -47,8 +48,30 @@ def auth_client(db):
     app.dependency_overrides.clear()
 
 @pytest.fixture(scope="function")
+def other_user_item(db):
+    """Creates a user with id=2 and a clothing item."""
+    user = User(
+        id=2,
+        email="test2@example.com",
+        hashed_password=hashed_pw,
+    )
+    clothing = ClothingItem(
+        user_id=2,
+        name="Test Shirt",
+        category="Tops",
+        color="Blue"
+    )
+    
+    db.add(user)
+    db.add(clothing)
+    db.commit()
+    db.refresh(user)
+    db.refresh(clothing)
+    return clothing
+
+@pytest.fixture(scope="function")
 def test_user(db):
-    """Creates a user with id=1 since wardrobe routes hardcode user_id=1."""
+    """Creates a user"""
     user = User(
         email="test@example.com",
         hashed_password=hashed_pw,
