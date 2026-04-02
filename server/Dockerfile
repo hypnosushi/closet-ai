@@ -17,6 +17,9 @@ RUN apt-get update && apt-get install -y \
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project
 
+# Pre-download rembg model weights
+RUN python -c "from rembg import new_session; new_session('u2net')"
+
 # Copy application code
 COPY . .
 

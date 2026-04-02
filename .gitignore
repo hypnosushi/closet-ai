@@ -22,3 +22,6 @@ Thumbs.db
 # Prompts
 .claude/
 CLAUDE.md
+
+# Temp 
+.temp/

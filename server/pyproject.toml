@@ -28,6 +28,8 @@ dependencies = [
     "python-jose[cryptography]>=3.5.0",
     "passlib[bcrypt]>=1.7.4",
     "bcrypt>=3.0,<4.0",
+    "rembg>=2.0.72",
+    "pillow>=12.1.0",
 ]
 
 [dependency-groups]

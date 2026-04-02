@@ -9,7 +9,7 @@ def test_register_success(auth_client):
 def test_register_duplicate_email(auth_client):
     auth_client.post("/auth/register", json=UserCreate(email="authtest@example.com", password="testpassword").model_dump())
     response = auth_client.post("/auth/register", json=UserCreate(email="authtest@example.com", password="testpassword2").model_dump())
-    assert response.status_code == 409 # 404?
+    assert response.status_code == 409 
 
 def test_login_success(auth_client, test_user):
     response = auth_client.post("/auth/login", data={"username": test_user.email, "password": "testpassword"})
