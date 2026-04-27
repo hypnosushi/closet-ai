@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from rembg import new_session
 from app.api.routes import chat, auth
 from app.models import Base
 from app.db.session import engine
@@ -10,6 +11,7 @@ from app.api.routes import wardrobe
 async def lifespan(app: FastAPI):
     # Startup code
     Base.metadata.create_all(bind=engine)
+    app.state.rembg_session = new_session("u2net")
     yield
     
 app = FastAPI(title="Closet AI", lifespan=lifespan)

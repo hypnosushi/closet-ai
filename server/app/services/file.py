@@ -4,30 +4,31 @@ from botocore.client import Config
 from fastapi import UploadFile
 from app.core.config import settings
 
-def get_minio_client():
-	return boto3.client(
-		"s3",
-		endpoint_url=settings.MINIO_ENDPOINT,
-		aws_access_key_id=settings.MINIO_ACCESS_KEY,
-		aws_secret_access_key=settings.MINIO_SECRET_KEY,
-		config=Config(signature_version="s3v4")
-	)
+def get_db_client():
+	kwargs = {
+		"aws_access_key_id": settings.AWS_ACCESS_KEY_ID,
+		"aws_secret_access_key": settings.AWS_SECRET_ACCESS_KEY,
+		"config": Config(signature_version="s3v4")
+	}
+	if settings.STORAGE_ENDPOINT:
+		kwargs["endpoint_url"] = settings.STORAGE_ENDPOINT
+
+	return boto3.client("s3", **kwargs)
 
 
-async def save_upload(file: UploadFile) -> str:
+async def save_upload(raw_bytes: bytes, filename: str) -> str:
 	"""
-	Uploads a file to MinIO and returns its public URL.
+	Uploads a file to S3 and returns its public URL.
 	"""
-	ext = file.filename.split(".")[-1] if file.filename and "." in file.filename else "jpg"
+	ext = filename.split(".")[-1] if filename and "." in filename else "png"
 	key = f"clothing/{uuid.uuid4().hex}.{ext}"
 
-	contents = await file.read()
 
-	client = get_minio_client()
+	client = get_db_client()
 	client.put_object(
-		Bucket=settings.MINIO_BUCKET_NAME,
+		Bucket=settings.S3_BUCKET_NAME,
 		Key=key,
-		Body=contents,
-		ContentType=file.content_type or "image/jpeg"
+		Body=raw_bytes,
+		ContentType="image/png"
 	)
-	return f"{settings.MINIO_ENDPOINT}/{settings.MINIO_BUCKET_NAME}/{key}"
+	return f"{settings.STORAGE_ENDPOINT}/{settings.S3_BUCKET_NAME}/{key}"
