@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
-from app.api.deps import get_current_user
+from app.api.deps import get_current_user, get_rembg_session
 from app.db.session import get_db
 from app.models import User
 from app.schemas.clothes import ClothingItemCreate, ClothingItemResponse, ClothingItemUpdate
@@ -43,10 +43,11 @@ async def create_clothing(item: ClothingItemCreate, db: Session = Depends(get_db
 async def upload_clothing(
     file: UploadFile = File(..., description="Upload a clothing item image", media_type="image/*"), 
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user)
+    user: User = Depends(get_current_user),
+    rembg_session = Depends(get_rembg_session)
 ):
     try: 
-        clothing_item = await clothing.upload_clothing_item(user_id=user.id, file=file, db=db)
+        clothing_item = await clothing.upload_clothing_item(user_id=user.id, file=file, db=db, rembg_session=rembg_session)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error uploading clothing item: {str(e)}")
     return clothing_item
