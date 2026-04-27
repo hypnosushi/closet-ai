@@ -33,9 +33,9 @@ class Settings(BaseSettings):
     # -----------------------------
     # MinIO / S3
     # -----------------------------
-    MINIO_ENDPOINT: str = "http://minio:9000"
-    MINIO_ACCESS_KEY: str = "minioadmin"
-    MINIO_SECRET_KEY: str = "minioadmin"
-    MINIO_BUCKET_NAME: str = "closet-ai"    
+    STORAGE_ENDPOINT: str | None = "http://minio:9000"
+    AWS_ACCESS_KEY_ID: str = "minioadmin"
+    AWS_SECRET_ACCESS_KEY: str = "minioadmin"
+    S3_BUCKET_NAME: str = "closet-ai"    
 
 settings = Settings()

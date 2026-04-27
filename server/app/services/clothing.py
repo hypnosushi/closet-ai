@@ -3,8 +3,9 @@ from typing import Optional
 from sqlalchemy.orm import Session
 from app.models.clothes import ClothingItem
 from app.schemas.clothes import ClothingItemCreate, ClothingItemUpdate
-from app.services.vision import parse_clothing_img
+from app.services.vision import process_image
 from app.services.file import save_upload
+from rembg.sessions.base import BaseSession
 
 
 async def create_clothing_item(
@@ -31,14 +32,15 @@ async def upload_clothing_item(
         user_id: int,
         db: Session,
         file: UploadFile,
+        rembg_session: BaseSession
     ) -> ClothingItem:
         
         """
         Creates a new clothing item        
         """
-        file_path = await save_upload(file)
-
-        metadata = await parse_clothing_img(file_path)
+        contents = await file.read()
+        processed = await process_image(contents, rembg_session)
+        file_path = await save_upload(processed)
 
         clothing_item = ClothingItem(
             user_id=user_id,

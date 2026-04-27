@@ -1,8 +1,11 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "server"
 version = "0.1.0"
 description = "Closet AI backend server"
-readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     # Web / API
@@ -28,7 +31,7 @@ dependencies = [
     "python-jose[cryptography]>=3.5.0",
     "passlib[bcrypt]>=1.7.4",
     "bcrypt>=3.0,<4.0",
-    "rembg>=2.0.72",
+    "rembg[cpu]>=2.0.72",
     "pillow>=12.1.0",
 ]
 
@@ -45,3 +48,6 @@ dev = [
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
