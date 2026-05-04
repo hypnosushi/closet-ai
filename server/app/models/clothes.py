@@ -3,8 +3,10 @@ from sqlalchemy.orm import relationship, Mapped, mapped_column
 from datetime import datetime
 from app.db.base import Base
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from app.models.user import User
+    from app.models.embedding import ClothingEmbedding
 
 
 class ClothingItem(Base):
@@ -18,8 +20,9 @@ class ClothingItem(Base):
     name: Mapped[str] = mapped_column(String, nullable=False)
     category: Mapped[str] = mapped_column(String, nullable=False)
     color: Mapped[str] = mapped_column(String, nullable=False)
+    img: Mapped[str] = mapped_column(String, nullable=False)
 
-    img: Mapped[str] = mapped_column(String, nullable=True)
+    description: Mapped[str] = mapped_column(String, nullable=True)
     material: Mapped[str] = mapped_column(String, nullable=True)
     size: Mapped[str] = mapped_column(String, nullable=True)
     brand: Mapped[str] = mapped_column(String, nullable=True)
@@ -27,3 +30,6 @@ class ClothingItem(Base):
 
     # Relationships
     owner: Mapped["User"] = relationship("User", back_populates="clothing_items")
+    embedding: Mapped["ClothingEmbedding"] = relationship(
+        "ClothingEmbedding", back_populates="item", uselist=False
+    )

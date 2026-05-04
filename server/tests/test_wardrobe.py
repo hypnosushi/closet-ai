@@ -56,7 +56,8 @@ def test_create_clothing_item(client, db, test_user):
         "material": "Leather",
         "size": "M",
         "brand": "Test Brand",
-        "price": 99.99
+        "price": 99.99,
+        "img": "http://example.com/jacket.jpg"
     }
     response = client.post("/wardrobe", json=clothing_data)
     assert response.status_code == 201

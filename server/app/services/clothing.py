@@ -3,7 +3,7 @@ from typing import Optional
 from sqlalchemy.orm import Session
 from app.models.clothes import ClothingItem
 from app.schemas.clothes import ClothingItemCreate, ClothingItemUpdate
-from app.services.vision import process_image
+from app.services.vision import extract_clothing_metadata, process_image
 from app.services.file import save_upload
 from rembg.sessions.base import BaseSession
 
@@ -41,6 +41,7 @@ async def upload_clothing_item(
         contents = await file.read()
         processed = await process_image(contents, rembg_session)
         file_path = await save_upload(processed)
+        metadata = await extract_clothing_metadata(file_path)
 
         clothing_item = ClothingItem(
             user_id=user_id,
