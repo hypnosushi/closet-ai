@@ -1,7 +1,6 @@
 import uuid
 import boto3
 from botocore.client import Config
-from fastapi import UploadFile
 from app.core.config import settings
 
 def get_db_client():
@@ -16,12 +15,11 @@ def get_db_client():
 	return boto3.client("s3", **kwargs)
 
 
-async def save_upload(raw_bytes: bytes, filename: str) -> str:
+async def save_upload(raw_bytes: bytes) -> str:
 	"""
 	Uploads a file to S3 and returns its public URL.
 	"""
-	ext = filename.split(".")[-1] if filename and "." in filename else "png"
-	key = f"clothing/{uuid.uuid4().hex}.{ext}"
+	key = f"clothing/{uuid.uuid4().hex}.png"
 
 
 	client = get_db_client()

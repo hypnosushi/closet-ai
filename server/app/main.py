@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from rembg import new_session
+from sqlalchemy import text
 from app.api.routes import chat, auth
 from app.models import Base
 from app.db.session import engine
@@ -10,6 +11,8 @@ from app.api.routes import wardrobe
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup code
+    with engine.begin() as conn:
+        conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
     Base.metadata.create_all(bind=engine)
     app.state.rembg_session = new_session("u2net")
     yield

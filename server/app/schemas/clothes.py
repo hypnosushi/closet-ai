@@ -10,7 +10,7 @@ class ClothingItemCreate(BaseModel):
     size: str | None = None
     brand: str | None = None
     price: float | None = None
-    img: str | None = None
+    img: str
 
 
 class ClothingItemResponse(BaseModel):
@@ -22,7 +22,7 @@ class ClothingItemResponse(BaseModel):
     category: str
     color: str
     material: str | None
-    img: str | None
+    img: str
     size: str | None = None
     brand: str | None = None
     price: float | None = None
